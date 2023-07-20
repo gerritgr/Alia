@@ -174,7 +174,7 @@ def test_to_canonical_smiles():
     
     assert result == expected_result, f"Expected '{expected_result}', but got '{result}'"
 
-test_to_canonical_smiles()
+
 
 
 # In[5]:
@@ -275,7 +275,7 @@ def test_mol_to_nx():
     return m
     
     
-test_mol_to_nx()
+
 
 
 # ## Smiles to Pyg

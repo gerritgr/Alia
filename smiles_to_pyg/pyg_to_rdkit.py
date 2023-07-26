@@ -284,7 +284,7 @@ def test_mol_to_nx():
 
 # ## Smiles to Pyg
 
-# In[45]:
+# In[70]:
 
 
 def smiles_to_pyg(smiles_mol):
@@ -300,7 +300,7 @@ def smiles_to_pyg(smiles_mol):
     if len(nodes) == 1:
         node_i = nodes[0]
         one_hot_atom_type_i = creat_one_hot(node_i['elem'])
-        feature_i = [1] + one_hot_atom_type_i + [-1] * 4
+        feature_i = [1] + one_hot_atom_type_i + [-1] * 5
         G.add_node(0, x=feature_i)
     
     for i, node_i in enumerate(nodes):
@@ -357,7 +357,7 @@ def test_smiles_to_pyg():
 
 # ## Nx to Mol
 
-# In[46]:
+# In[71]:
 
 
 def nx_to_mol(G):
@@ -405,7 +405,7 @@ def test_nx_to_mol():
 
 # ## Smiles to PyG
 
-# In[47]:
+# In[72]:
 
 
 def pyg_to_smiles(g):
@@ -460,7 +460,7 @@ def test_all_1():
 
 # ## Read Qm9
 
-# In[64]:
+# In[73]:
 
 
 def read_qm9(start=0, end=-1):
@@ -485,6 +485,12 @@ def read_qm9(start=0, end=-1):
     return dataset
 
 
+# In[74]:
+
+
+#read_qm9(start=0, end=10)[0].x, read_qm9(start=0, end=10)[-1].x
+
+
 # In[65]:
 
 
@@ -502,7 +508,7 @@ def test_read_qm9():
     print(f"Size of the variable: {size_in_mb:.2f} MB")
 
 
-# In[ ]:
+# In[75]:
 
 
 #test_read_qm9()

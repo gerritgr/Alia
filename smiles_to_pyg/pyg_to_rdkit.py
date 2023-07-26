@@ -5,7 +5,7 @@
 
 # ## Imports
 
-# In[1]:
+# In[61]:
 
 
 import torch_geometric as pyg
@@ -17,10 +17,14 @@ import numpy as np
 
 from torch_geometric.utils import from_networkx
 import matplotlib.pyplot as plt
+import pandas as pd
+from tqdm import tqdm
 
 import networkx as nx
 from rdkit import Chem
 from rdkit import Chem
+import pickle
+import gzip
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -28,7 +32,7 @@ import matplotlib.pyplot as plt
 
 # ## Drawing
 
-# In[2]:
+# In[39]:
 
 
 def draw_molecules(list_of_smiles, molsPerRow=2):
@@ -42,7 +46,7 @@ def draw_molecules(list_of_smiles, molsPerRow=2):
 
 
 
-# In[3]:
+# In[40]:
 
 
 def mean_value(vec):
@@ -133,7 +137,7 @@ def draw_nx_graph(g):
 
 # ## Utils
 
-# In[4]:
+# In[41]:
 
 
 def to_canonical_smiles(smiles):
@@ -174,10 +178,10 @@ def test_to_canonical_smiles():
     
     assert result == expected_result, f"Expected '{expected_result}', but got '{result}'"
 
+test_to_canonical_smiles()
 
 
-
-# In[5]:
+# In[42]:
 
 
 def get_neighbors(data, node_id):
@@ -211,7 +215,7 @@ def get_neighbors(data, node_id):
     return neighbors
 
 
-# In[6]:
+# In[43]:
 
 
 atomic_number_to_symbol = {
@@ -235,7 +239,7 @@ def test_creat_one_hot():
 
 # ## Molecule to Nx
 
-# In[7]:
+# In[44]:
 
 
 def mol_to_nx(mol):
@@ -275,12 +279,12 @@ def test_mol_to_nx():
     return m
     
     
-
+#test_mol_to_nx()
 
 
 # ## Smiles to Pyg
 
-# In[14]:
+# In[45]:
 
 
 def smiles_to_pyg(smiles_mol):
@@ -353,7 +357,7 @@ def test_smiles_to_pyg():
 
 # ## Nx to Mol
 
-# In[16]:
+# In[46]:
 
 
 def nx_to_mol(G):
@@ -401,7 +405,7 @@ def test_nx_to_mol():
 
 # ## Smiles to PyG
 
-# In[19]:
+# In[47]:
 
 
 def pyg_to_smiles(g):
@@ -454,6 +458,56 @@ def test_all_1():
     return draw_molecules(smiles_list_out)
 
 
+# ## Read Qm9
+
+# In[64]:
+
+
+def read_qm9(start=0, end=-1):
+    filepath = f"qm9_as_graphs_from_{start}_to_{end}.pickle"
+    try:
+        with gzip.open(filepath, "rb") as f:
+            dataset = pickle.load(f)
+            return dataset
+    except:
+        print(filepath, "not found. Creating it now.")
+    
+    df = pd.read_csv("qm9.csv")
+    smiles_list_in = df.smiles[start:end].tolist()
+    dataset = list()
+    for s in tqdm(smiles_list_in):
+        smiles_in = to_canonical_smiles(s)
+        g = smiles_to_pyg(smiles_in)
+        dataset.append(g)
+        
+    with gzip.open(filepath, "wb") as f:  # Open the file in binary write mode with gzip compression
+        pickle.dump(dataset, f)
+    return dataset
+
+
+# In[65]:
+
+
+def test_read_qm9():
+    dataset = read_qm9()
+    len(dataset)
+
+    import sys
+
+    size_in_bytes = sys.getsizeof(dataset)
+
+    # Converting the size to megabytes (MB)
+    size_in_mb = size_in_bytes / (1024 * 1024)
+
+    print(f"Size of the variable: {size_in_mb:.2f} MB")
+
+
+# In[ ]:
+
+
+#test_read_qm9()
+
+
 # ## Testing
 
 # In[20]:
@@ -482,6 +536,12 @@ def test_all_2():
     with open("mol_image.svg", 'w') as f:
         f.write(svg.data)
     return svg
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:

@@ -30,6 +30,13 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
+# In[106]:
+
+
+ATOM_INDICATOR = 1
+BOND_INDICATOR = -1
+
+
 # ## Drawing
 
 # In[39]:
@@ -46,7 +53,7 @@ def draw_molecules(list_of_smiles, molsPerRow=2):
 
 
 
-# In[40]:
+# In[126]:
 
 
 def mean_value(vec):
@@ -74,7 +81,7 @@ def pyg_to_reduced_nx(g):
         row = g.x[v_i, :]
         if row[0] > 0.5:
             # is atom
-            elem = torch.argmax(row[1:])
+            elem = torch.argmax(row[1:6])
             g_nx.add_node(v_i, elem=elem.item())
             
     for v_i in range(g.x.shape[0]):
@@ -93,7 +100,7 @@ def pyg_to_reduced_nx(g):
     
 
 def elem_to_color(symbol):
-    if "float" in str(type(symbol)):
+    if "float" in str(type(symbol)) or "int" in str(type(symbol)):
         symbol = round(symbol)  # Round the input in case it is a float
         symbol = atomic_number_to_symbol.get(symbol, 'Unknown')
 
@@ -108,36 +115,37 @@ def elem_to_color(symbol):
     if symbol in cpk_colors:
         return cpk_colors[symbol]
     else:
-        return '#808080'  # Default color for unknown elements (Gray)
+        return '#000000'  # Default color for unknown elements (Black)
 
 
 
 
-def draw_nx_graph(g):
+def draw_nx_graph(g, ax=None):
     pos = nx.spring_layout(g)  # Positions for nodes in the graph
     
     for v_i in g.nodes():
         elem = g.nodes[v_i]['elem']
         c = elem_to_color(elem)
-        nx.draw_networkx_nodes(g, pos=pos, nodelist=[v_i], node_color=[c])
+        nx.draw_networkx_nodes(g, pos=pos, nodelist=[v_i], node_color=[c], ax=ax)
 
     for v_i, v_j in g.edges():
         bond_type = g.edges[(v_i, v_j)]['bond_type']
         #bond_type = 2 if bond_type==4 else bond_type
-        nx.draw_networkx_edges(g, pos=pos, edgelist=[(v_i, v_j)], width=bond_type*2, alpha=(bond_type+4)/8.0)
+        nx.draw_networkx_edges(g, pos=pos, edgelist=[(v_i, v_j)], width=bond_type*2, alpha=(bond_type+4)/8.0, ax=ax)
 
     # Draw labels for nodes
     labels = nx.get_node_attributes(g, 'elem')
-    nx.draw_networkx_labels(g, pos=pos, labels=labels)
+    nx.draw_networkx_labels(g, pos=pos, labels=labels, ax=ax)
 
     # Show the graph
     plt.axis('off')
-    plt.show()
+    if ax is None:
+        plt.show()
 
 
 # ## Utils
 
-# In[41]:
+# In[127]:
 
 
 def to_canonical_smiles(smiles):
@@ -181,7 +189,7 @@ def test_to_canonical_smiles():
 test_to_canonical_smiles()
 
 
-# In[42]:
+# In[91]:
 
 
 def get_neighbors(data, node_id):
@@ -215,7 +223,7 @@ def get_neighbors(data, node_id):
     return neighbors
 
 
-# In[43]:
+# In[92]:
 
 
 atomic_number_to_symbol = {
@@ -239,7 +247,7 @@ def test_creat_one_hot():
 
 # ## Molecule to Nx
 
-# In[44]:
+# In[93]:
 
 
 def mol_to_nx(mol):
@@ -284,7 +292,7 @@ def test_mol_to_nx():
 
 # ## Smiles to Pyg
 
-# In[70]:
+# In[107]:
 
 
 def smiles_to_pyg(smiles_mol):
@@ -300,7 +308,7 @@ def smiles_to_pyg(smiles_mol):
     if len(nodes) == 1:
         node_i = nodes[0]
         one_hot_atom_type_i = creat_one_hot(node_i['elem'])
-        feature_i = [1] + one_hot_atom_type_i + [-1] * 5
+        feature_i = [ATOM_INDICATOR] + one_hot_atom_type_i + [-1] * 5
         G.add_node(0, x=feature_i)
     
     for i, node_i in enumerate(nodes):
@@ -310,8 +318,8 @@ def smiles_to_pyg(smiles_mol):
             assert(node_i[0] == i and node_j[0] == j)
             one_hot_atom_type_i = creat_one_hot(node_i[1]['elem'])
             one_hot_atom_type_j = creat_one_hot(node_j[1]['elem'])
-            feature_i = [1] + one_hot_atom_type_i + [-1] * 5
-            feature_j = [1] + one_hot_atom_type_j + [-1] * 5
+            feature_i = [ATOM_INDICATOR] + one_hot_atom_type_i + [-1] * 5
+            feature_j = [ATOM_INDICATOR] + one_hot_atom_type_j + [-1] * 5
             G.add_node(i, x=feature_i)
             G.add_node(j, x=feature_j)
             
@@ -321,7 +329,7 @@ def smiles_to_pyg(smiles_mol):
         assert(node_i != node_j)
         bond_indicator = [0,0,0,0,0]
         bond_indicator[edge_attr["bond_type"]] = 1
-        feature_ij = [0] + [-1] * 5 + bond_indicator
+        feature_ij = [-1] + [-1] * 5 + bond_indicator
         node_ij = (node_i+1)*100000+(node_j+1)*1000
         G.add_node(node_ij, x=feature_ij)
         edges_that_exist.append(tuple(sorted([node_i, node_j])))
@@ -337,7 +345,7 @@ def smiles_to_pyg(smiles_mol):
             edge_ij = tuple(sorted([i, j]))
             if edge_ij in edges_that_exist or edge_ij in edges_donot_that_exist:
                 continue
-            feature_ij = [0] + [-1] * 5 + [1,0,0,0,0]
+            feature_ij = [BOND_INDICATOR] + [-1] * 5 + [1,0,0,0,0]
             node_ij = (i+1)*100000+(j+1)*1000
             G.add_node(node_ij, x=feature_ij)
             G.add_edge(i, node_ij)
@@ -357,7 +365,7 @@ def test_smiles_to_pyg():
 
 # ## Nx to Mol
 
-# In[71]:
+# In[108]:
 
 
 def nx_to_mol(G):
@@ -405,7 +413,7 @@ def test_nx_to_mol():
 
 # ## Smiles to PyG
 
-# In[72]:
+# In[109]:
 
 
 def pyg_to_smiles(g):
@@ -460,7 +468,7 @@ def test_all_1():
 
 # ## Read Qm9
 
-# In[73]:
+# In[118]:
 
 
 def read_qm9(start=0, end=-1):
@@ -485,17 +493,17 @@ def read_qm9(start=0, end=-1):
     return dataset
 
 
-# In[74]:
+# In[121]:
 
 
-#read_qm9(start=0, end=10)[0].x, read_qm9(start=0, end=10)[-1].x
+#read_qm9()
 
 
-# In[65]:
+# In[120]:
 
 
-def test_read_qm9():
-    dataset = read_qm9()
+def test_read_qm9(end=-1):
+    dataset = read_qm9(end=end)
     len(dataset)
 
     import sys
@@ -506,12 +514,24 @@ def test_read_qm9():
     size_in_mb = size_in_bytes / (1024 * 1024)
 
     print(f"Size of the variable: {size_in_mb:.2f} MB")
+    return dataset
 
 
-# In[75]:
+# In[132]:
 
 
-#test_read_qm9()
+#dataset = test_read_qm9()
+#g = dataset[1000]
+#print(g.x)
+#g_nx = pyg_to_reduced_nx(g) 
+#print(g_nx, g_nx.nodes(data=True), '\n',g_nx.edges(data=True))
+#draw_nx_graph(g_nx)
+
+#g.x[:,1:] = torch.rand_like(g.x[:,1:])
+#print(g.x)
+#g_nx = pyg_to_reduced_nx(g) 
+#print(g_nx, g_nx.nodes(data=True), '\n',g_nx.edges(data=True))
+#draw_nx_graph(g_nx)
 
 
 # ## Testing

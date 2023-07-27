@@ -19,6 +19,8 @@ from torch_geometric.utils import from_networkx
 import matplotlib.pyplot as plt
 import pandas as pd
 from tqdm import tqdm
+import sys 
+import os
 
 import networkx as nx
 from rdkit import Chem

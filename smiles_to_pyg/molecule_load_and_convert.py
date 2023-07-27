@@ -43,7 +43,8 @@ BOND_INDICATOR = -1
 
 
 def fix_folder_path(file_name):
-    current_script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+    current_script_dir = os.path.dirname(os.path.abspath(__file__))
+    #current_script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
     return os.path.join(current_script_dir, file_name)
 
 

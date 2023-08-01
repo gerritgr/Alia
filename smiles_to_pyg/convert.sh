@@ -9,3 +9,5 @@ do
     mv "${filename}.py.py" "${filename}.py"
     mv "${filename}.py.txt" "${filename}.py"
 done
+
+# run with conda run -n ginaenv python AliaMolecule_Adversarially_Guided_Diffusion.py

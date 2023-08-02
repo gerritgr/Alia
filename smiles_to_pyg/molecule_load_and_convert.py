@@ -154,7 +154,7 @@ def draw_nx_graph(g, ax=None):
         plt.show()
 
 
-# In[1]:
+# In[2]:
 
 
 def draw_pyg_graph(g, ax=None):
@@ -436,6 +436,9 @@ def test_nx_to_mol():
 
 
 def pyg_to_smiles(g):
+    from rdkit import rdBase
+    rdBase.DisableLog('rdApp.*')
+    
     g_nx = nx.Graph()
     
     for i in range(g.x.shape[0]):

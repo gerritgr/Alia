@@ -63,6 +63,7 @@ def draw_molecules(list_of_smiles, molsPerRow=2):
 
 
 
+
 # In[ ]:
 
 
@@ -151,6 +152,14 @@ def draw_nx_graph(g, ax=None):
     plt.axis('off')
     if ax is None:
         plt.show()
+
+
+# In[1]:
+
+
+def draw_pyg_graph(g, ax=None):
+    g_nx = pyg_to_reduced_nx(g) 
+    draw_nx_graph(g_nx, ax=ax)
 
 
 # ## Utils

@@ -187,7 +187,7 @@ def to_canonical_smiles(smiles):
         canonical_smiles = Chem.MolToSmiles(mol, isomericSmiles=True)
         return canonical_smiles
     except Exception as e:
-        print(f"An error occurred: {e}")
+        raise e
 
         
 def test_to_canonical_smiles():

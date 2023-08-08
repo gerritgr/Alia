@@ -5,7 +5,7 @@
 
 # ## Imports
 
-# In[16]:
+# In[38]:
 
 
 import torch_geometric as pyg
@@ -15,7 +15,7 @@ import torch
 import torch_geometric
 import numpy as np
 
-from torch_geometric.utils import from_networkx
+from torch_geometric.utils import from_networkx, to_networkx
 import matplotlib.pyplot as plt
 import pandas as pd
 from tqdm import tqdm
@@ -493,7 +493,7 @@ def test_all_1():
 
 # ## Read Qm9
 
-# In[36]:
+# In[39]:
 
 
 def read_qm9(start=0, end=None):
@@ -518,6 +518,8 @@ def read_qm9(start=0, end=None):
             g = smiles_to_pyg(smiles_in)
             assert("None" not in str(pyg_to_smiles(g)))
             assert(g.x.shape[0] > 1)
+            g_nx = pyg_to_reduced_nx(g) 
+            assert(nx.is_connected(g_nx))
             dataset.append(g)
         except:
             error_list.append(s)

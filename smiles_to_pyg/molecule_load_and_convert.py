@@ -5,7 +5,7 @@
 
 # ## Imports
 
-# In[4]:
+# In[16]:
 
 
 import torch_geometric as pyg
@@ -32,25 +32,28 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-# In[ ]:
+# In[17]:
 
 
 ATOM_INDICATOR = 1
 BOND_INDICATOR = -1
 
 
-# In[1]:
+# In[18]:
 
 
 def fix_folder_path(file_name):
-    current_script_dir = os.path.dirname(os.path.abspath(__file__))
-    #current_script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
-    return os.path.join(current_script_dir, file_name)
+    try:
+        current_script_dir = os.path.dirname(os.path.abspath(__file__))
+        #current_script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+        return os.path.join(current_script_dir, file_name)
+    except:
+        return file_name
 
 
 # ## Drawing
 
-# In[ ]:
+# In[19]:
 
 
 def draw_molecules(list_of_smiles, molsPerRow=2):
@@ -64,7 +67,7 @@ def draw_molecules(list_of_smiles, molsPerRow=2):
 
 
 
-# In[ ]:
+# In[20]:
 
 
 def mean_value(vec):
@@ -154,7 +157,7 @@ def draw_nx_graph(g, ax=None):
         plt.show()
 
 
-# In[2]:
+# In[21]:
 
 
 def draw_pyg_graph(g, ax=None):
@@ -164,7 +167,7 @@ def draw_pyg_graph(g, ax=None):
 
 # ## Utils
 
-# In[2]:
+# In[22]:
 
 
 def to_canonical_smiles(smiles):
@@ -208,7 +211,7 @@ def test_to_canonical_smiles():
 #test_to_canonical_smiles()
 
 
-# In[3]:
+# In[23]:
 
 
 def get_neighbors(data, node_id):
@@ -242,7 +245,7 @@ def get_neighbors(data, node_id):
     return neighbors
 
 
-# In[92]:
+# In[24]:
 
 
 atomic_number_to_symbol = {
@@ -266,7 +269,7 @@ def test_creat_one_hot():
 
 # ## Molecule to Nx
 
-# In[93]:
+# In[25]:
 
 
 def mol_to_nx(mol):
@@ -311,7 +314,7 @@ def test_mol_to_nx():
 
 # ## Smiles to Pyg
 
-# In[107]:
+# In[26]:
 
 
 def smiles_to_pyg(smiles_mol):
@@ -384,7 +387,7 @@ def test_smiles_to_pyg():
 
 # ## Nx to Mol
 
-# In[108]:
+# In[27]:
 
 
 def nx_to_mol(G):
@@ -432,7 +435,7 @@ def test_nx_to_mol():
 
 # ## Smiles to PyG
 
-# In[109]:
+# In[28]:
 
 
 def pyg_to_smiles(g):
@@ -490,10 +493,10 @@ def test_all_1():
 
 # ## Read Qm9
 
-# In[2]:
+# In[33]:
 
 
-def read_qm9(start=0, end=-1):
+def read_qm9(start=0, end=None):
     filepath = f"qm9_as_graphs_from_{start}_to_{end}.pickle"
     filepath = fix_folder_path(filepath)
     try:
@@ -504,25 +507,36 @@ def read_qm9(start=0, end=-1):
         print(filepath, "not found. Creating it now.")
     
     df = pd.read_csv(fix_folder_path("qm9.csv"))
+    if end is None:
+        end = len(df.smiles)
     smiles_list_in = df.smiles[start:end].tolist()
     dataset = list()
+    error_list = list()
     for s in tqdm(smiles_list_in):
-        smiles_in = to_canonical_smiles(s)
-        g = smiles_to_pyg(smiles_in)
-        dataset.append(g)
+        try:
+            smiles_in = to_canonical_smiles(s)
+            g = smiles_to_pyg(smiles_in)
+            assert("None" not in str(pyg_to_smiles(g)))
+            dataset.append(g)
+        except:
+            error_list.append(s)
+    if len(error_list) > 0:
+        print("could not convert all molecules, error list was written to file, original length:", len(smiles_list_in), "output length:", len(dataset))
+        df_error = pd.DataFrame({"invalid": error_list})
+        df_error.to_csv("smiles_that_could_not_be_converted.csv", index=False)
         
     with gzip.open(filepath, "wb") as f:  # Open the file in binary write mode with gzip compression
         pickle.dump(dataset, f)
     return dataset
 
 
-# In[3]:
+# In[35]:
 
 
-#read_qm9()
+#_ = read_qm9()
 
 
-# In[120]:
+# In[17]:
 
 
 def test_read_qm9(end=-1):
@@ -540,7 +554,7 @@ def test_read_qm9(end=-1):
     return dataset
 
 
-# In[132]:
+# In[18]:
 
 
 #dataset = test_read_qm9()
@@ -559,7 +573,7 @@ def test_read_qm9(end=-1):
 
 # ## Testing
 
-# In[20]:
+# In[19]:
 
 
 def test_all_2():

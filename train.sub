@@ -1,5 +1,5 @@
 universe = docker
-docker_image = gerritgr/deepset:latest
+docker_image = gerritgr/alia:latest
 executable = run.sh
 output = train_mgg.$(ClusterId).$(ProcId).out
 error = train_mgg.$(ClusterId).$(ProcId).err

@@ -1,6 +1,6 @@
 conda config --env --add channels conda-forge
 
-cd /home/s9gtgros/DeepSet/
+cd /home/s9gtgros/Alia/
 bash convert.sh
 # python train.py > output.txt 2>&1
 pip list > pip_list.txt 2>&1

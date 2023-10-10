@@ -1,5 +1,5 @@
 conda config --env --add channels conda-forge
-sudo apt-get install libxrender1
+
 cd /home/s9gtgros/Alia/
 bash convert.sh
 # python train.py > output.txt 2>&1

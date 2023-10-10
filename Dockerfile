@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
+RUN sudo apt-get install libxrender1
+
+
 # Create a working directory
 RUN mkdir /main
 RUN mkdir /main/home

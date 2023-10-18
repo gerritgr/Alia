@@ -19,7 +19,7 @@ RUN apt-get -y update
 RUN sudo apt-get install libxrender1
 
 
-RUN rm *.pth *.dataset *.pickle # because no space left on device
+# RUN rm *.pth *.dataset *.pickle # because no space left on device
 
 # Create a working directory
 RUN mkdir /main

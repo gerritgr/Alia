@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Do not run as root
+
 sudo apt-get install nvidia-modprobe -y 
 
 # Step 0: Clone the GitHub repository and change directory
@@ -21,6 +23,8 @@ wget https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh -O anac
 echo "Installing Anaconda..."
 bash anaconda.sh -b -p $HOME/anaconda
 echo "Anaconda installed."
+
+exec bash
 
 # Initialize Anaconda (you may need to restart your shell after running this script)
 $HOME/anaconda/bin/conda init
